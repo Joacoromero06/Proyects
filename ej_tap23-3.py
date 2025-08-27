@@ -1,3 +1,4 @@
+import sys
 from collections import defaultdict
 class grafo: 
     def __init__(self):
@@ -17,7 +18,7 @@ class grafo:
             if x!=c_i:
                 for v,w in self.vecinos(x):
                     if v!=c_i:
-                        Gi_sig.agregar_arista(x,v)
+                        Gi_sig.agrega_arista(x,v)
         Gi_sig.d0=self.d0
         return Gi_sig
     
@@ -29,8 +30,8 @@ class grafo:
         S.add(0)
         inf=1000000000
         n=len(V)
-        D=[inf for i in n]
-        for v,w in self.vecinos(u):
+        D=[inf for i in range(n)]
+        for v,w in self.vecinos(0):
             D[v]=w#w es igual a 1
 
         #algoritmo dijkstra    
@@ -39,7 +40,7 @@ class grafo:
             u=None
             for v in V:
                 if v not in S and D[v]<min:
-                    u=V
+                    u=v
                     min=D[v]
             if u is None:
                 break
@@ -67,7 +68,7 @@ class grafo:
 
     def puntos_criticos(self):
         puntos_criticos=0
-        for v in self.vertices:
+        for v in self.vertices():
             g_sig=self.eliminar_ci(v)
             if g_sig.esta_roto():
                 puntos_criticos+=1
@@ -95,6 +96,26 @@ def resuelve(eliminar,grafo):
     
     return output
 
+def main():
+    data= sys.stdin.read().split()
+    data= list(map(int,data))
+    N,M,K=data[0],data[1],data[2]
 
+    for i in range (3,len(data),1):
+        data[i]-=1
+        
+    Grafonia_0=grafo()
+    for i in range(3,2*M +3,2):
+        Grafonia_0.agrega_arista(data[i],data[i+1])
 
+    eliminar=list()    
+    for i in range(2*M +3,len(data),1):
+        eliminar.append(data[i])
+    
+    salida=resuelve(eliminar,Grafonia_0)
+    print(salida)
+    for x in salida:
+        sys.stdout.write('f{x}\n')
 
+if __name__ =='__main__':
+    main()
