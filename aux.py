@@ -1,7 +1,3 @@
-print('hello')
-
-#!/usr/bin/env python3
-
 def demostrar_error_punto_flotante():
     print("=== DEMOSTRACIÓN DEL ERROR DE PUNTO FLOTANTE ===\n")
     
