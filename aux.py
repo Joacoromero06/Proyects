@@ -1,3 +1,4 @@
+"""
 def demostrar_error_punto_flotante():
     print("=== DEMOSTRACIÓN DEL ERROR DE PUNTO FLOTANTE ===\n")
     
@@ -87,3 +88,49 @@ if __name__ == "__main__":
     print("• Una tolerancia como 1e-9 elimina estos errores sin afectar valores reales")
     print("• 1e-9 es mucho mayor que los errores típicos (~1e-15) pero mucho menor")
     print("  que cualquier tamaño de archivo significativo en el problema")
+"""
+def afnd2afd(A: list):
+    """
+descripcion:
+	Convierte un ‘A’ un afnd -> afd. 
+	El tipo afd no existe, es implicito.
+entrada:
+	A es una ‘list’ de 5 elementos (componentes de un AF)
+	1er elemento: ‘set’ representa el conjunto de estados ‘string’
+	2do elemento: ‘set’ representa el conjunto de simbolos ‘string’
+	3er elemento: ‘set’ representa el conjunto de transiciones, cada transicion es ‘list’ de 3 elementos del tipo (estado, simbolo, {estados})
+	4to elemento: ‘string’ estado inicial
+	5to elemento: ‘set’ representa el conjunto de estados de aceptacion
+salida:
+	B es una ‘list’ de 5 elementos (componentes de un AF)
+	Todos los elementos siguen las propiedades de los elementos de A, con la diferencia de construccion de subconjuntos (algoritmo) para cada elemento
+	El 3er elemento de tipo ‘set’ representa el conjunto de transiciones, cada transicion es ‘list’ de 3 elementos del tipo (estado, simbolo, estado) 
+    """
+    # Inicio del algoritmo
+    Q_a, Alf_a, Delta_a, est_inicial_a, F_a = A 
+    
+    Q_b = {est_inicial_a}
+    Alf_b = Alf_a
+    est_inicial_b = "{est_inicial_a}"
+    Delta_b = {}
+
+    # Busqueda de estado con transicion no definida
+    p_no_def = None
+    for p in Q_b:
+        band = False
+        for q_origen, a, q_dest in Delta_b:
+            if p == q_origen:
+                band = True # p esta definido
+                break
+        if not band:
+            p_no_def = p
+            break
+        
+    
+    # Construccion de estados & Definicion de transiciones
+    while p_no_def != None: 
+        for a in Alf_b:
+            for r in Parse(p_no_def):   # Parsea '{q1,q2,..,qn}' -> {'q1','q2',...,'qn'}
+                # Definir transicion para 'p_no_def'
+                
+                Delta_b = Delta_b (union) sea
