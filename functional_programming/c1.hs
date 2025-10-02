@@ -45,7 +45,15 @@ the NAMES are defined with certain EXPRESSION
 -}
 in_range4:: Integer -> Integer -> Integer -> Bool
 in_range4 min x max = l_low && l_up
-where
-    l_low = min <= x
-    l_up = x <= max
+    where
+        l_low = min <= x
+        l_up = x <= max
+
+es_pos:: Int -> Bool
+es_pos x = x>0
+
+-- % a b = a `mod` b
+
+es_devisible:: Int -> Int -> Bool
+es_devisible n x = mod x n == 0
 
