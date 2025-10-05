@@ -1,4 +1,4 @@
-import Data.Binary.Builder (singleton)
+
 {-
 definir funciones según la estructura de sus argumentos.
 f patron1 = exp1
