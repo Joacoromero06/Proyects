@@ -57,3 +57,32 @@ es_pos x = x>0
 es_devisible:: Int -> Int -> Bool
 es_devisible n x = mod x n == 0
 
+-- suma los numeros pares de una lista de enteros
+sumaPares:: [Int] -> Int
+sumaPares (x:xs)   
+ |mod x 2 == 0 = x + sumaPares xs
+ |mod x 2 == 1 = sumaPares xs
+sumaPares [] = 0
+
+
+-- transforma un caracter a una lista de n caracteres
+replicar:: Char -> Int -> String
+replicar c 0 = []
+replicar c n = c: replicar c (n-1)
+
+-- Reduce un String a su cantidad de caracteres
+cuentaVocales:: String -> Int
+cuentaVocales [] = 0
+cuentaVocales (x:xs)
+ | x == 'a' = 1 + cuentaVocales xs
+ | x == 'e' = 1 + cuentaVocales xs
+ | x == 'i' = 1 + cuentaVocales xs
+ | x == 'o' = 1 + cuentaVocales xs
+ | x == 'u' = 1 + cuentaVocales xs
+ | otherwise = cuentaVocales xs
+-- definir primero los casos bases y errores
+
+-- Transforma un String a su forma donde no comparte caracteres con otro String
+limpia:: String -> String -> String
+limpia x y
+
