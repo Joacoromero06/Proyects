@@ -89,7 +89,7 @@ if __name__ == '__main__':
     print("--- Probando una función válida ---")
     try:
         # Crear
-        func = FunctionHandler("x***3 - 2*x + 1")
+        func = FunctionHandler("cos x - sin x + exp x")
         x0 = 2
         
         # pruebas de metodos python
