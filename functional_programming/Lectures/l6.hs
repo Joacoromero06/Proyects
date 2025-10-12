@@ -2,15 +2,15 @@
 Write a function stail, that behaves as tail, except that maps [] -> []
 -}
 stail1:: [Int] -> [Int]
-stail1 xs = if null xs then [] else tail xs
+stail1 xs = if null xs then mat_2_list [] else tail xs
 
 stail2:: [Int] -> [Int]
-stail2 [] = []
+stail2 [] = mat_2_list []
 stail2 (_:xs) = xs
 
 stail3:: [Int] -> [Int]
 stail3 xs
- | null xs = []
+ | null xs = mat_2_list []
  | otherwise = tail xs
 
 {-
