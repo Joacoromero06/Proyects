@@ -1,0 +1,19 @@
+%option noyywrap
+%option yylineno
+
+%{
+#include <stdio.h>
+%}
+
+%%
+
+[^\n]+   {printf("STRING: %s.\t(line %d)\nLASTCHAR: %c\n", yytext, yylineno, yytext[yyleng-1]);}
+\n      {printf("NEWLINE(%d)\n",yylineno);}
+^inicio.*\n {printf("LINEA %d\tempieza con inicio\nUltimo caracter: %c", yylineno, yytext[yyleng-1]);
+            if(yytext[yyleng-1]=='\n')printf("barra n contado dos veces?\n");}
+
+%%
+int main(void){
+    yylex();
+    return 0;
+}

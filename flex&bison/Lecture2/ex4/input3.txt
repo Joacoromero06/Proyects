@@ -1,0 +1,17 @@
+void mi_ej1();
+int main() {
+    vec_ent v[12];
+    int n, acu;
+    n = 10;
+    acu = 0;
+    for (int i = 1; i <= n; i++)
+        acu += i;
+    printf("la sumatoria desde 1 hasta %d es: %d", n, acu);
+    return 0;
+}
+int pedirEntero(){
+    int x;
+    printf("\nIngrese un nro entero: ");
+    scanf("%d", &x);
+    return x;
+}

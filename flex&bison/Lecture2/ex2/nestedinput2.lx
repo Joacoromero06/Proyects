@@ -1,0 +1,123 @@
+%option noyywrap
+%x IFILE
+
+%{
+/*
+ * Flex scanner to simulate preprocessing include directives.
+ * It handles nested include files using a buffer stack.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct node_bufs_stack {
+    struct node_bufs_stack *prev;  /* previous stack node */
+    YY_BUFFER_STATE bs;            /* flex buffer state */
+    char *filename;                /* file name */
+    FILE *f;                       /* file pointer */
+    int lineno;                    /* current line number */
+} node_bufs_stack;
+
+typedef node_bufs_stack* bufs_stack;
+
+/* Stack management functions */
+int push_file(char *fn);
+int pop_file(void);
+
+/* Global variables */
+bufs_stack curr_bs = NULL;
+char *curr_filename = NULL;
+
+%}
+
+%%
+
+^"#"[ \t]*"include"[ \t]*[\"<]    { BEGIN(IFILE); }
+
+<IFILE>[^ \t\n\">]+ {
+    int c;
+    while ((c = input()) && c != '\n');
+    yylineno++;
+    if (!push_file(yytext))
+        yyterminate();
+    BEGIN(INITIAL);
+}
+
+<IFILE>.|\n {
+    fprintf(stderr, "%3d bad include line\n", yylineno);
+    yyterminate();
+}
+
+<<EOF>> {
+    if (!pop_file()) yyterminate();
+}
+
+^.      { fprintf(stdout, "[%s:%d]> %s", curr_filename, yylineno, yytext); }
+^\n     { fprintf(stdout, "[%s:%d]> %s", curr_filename, yylineno++, yytext); }
+\n      { ECHO; yylineno++; }
+.       { ECHO; }
+
+%%
+
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        fprintf(stderr, "Necesito nombre de archivo\n");
+        return 1;
+    }
+    if (push_file(argv[1]))
+        yylex();
+    else
+        fprintf(stderr, "No se encuentra el archivo: %s\n", argv[1]);
+    return 0;
+}
+
+/* Push new file onto stack */
+int push_file(char *fn) {
+    FILE *f = fopen(fn, "r");
+    if (!f) { perror(fn); return 0; }
+
+    bufs_stack pila = malloc(sizeof(node_bufs_stack));
+    if (!pila) { perror("malloc"); exit(1); }
+
+    fprintf(stdout, "=======Entrando al archivo: %s=======\n", fn);
+
+    if (curr_bs)
+        curr_bs->lineno = yylineno;
+
+    pila->prev = curr_bs;
+    pila->f = f;
+    pila->filename = strdup(fn);
+    pila->bs = yy_create_buffer(f, YY_BUF_SIZE);
+
+    yy_switch_to_buffer(pila->bs);
+    curr_bs = pila;
+    yylineno = 1;
+    curr_filename = pila->filename;
+
+    return 1;
+}
+
+/* Pop file from stack */
+int pop_file(void) {
+    if (!curr_bs) return 0;
+    fprintf(stdout, "\n=======Saliendo del archivo: %s=======\n", curr_bs->filename);
+
+
+    bufs_stack pila = curr_bs;
+    bufs_stack prev = pila->prev;
+
+    fclose(pila->f);
+    yy_delete_buffer(pila->bs);
+    free(pila->filename);
+    free(pila);
+
+    if (!prev)
+        return 0; /* finished outermost file */
+
+    curr_bs = prev;
+    yy_switch_to_buffer(prev->bs);
+    yylineno = prev->lineno;
+    curr_filename = prev->filename;
+    return 1;
+}

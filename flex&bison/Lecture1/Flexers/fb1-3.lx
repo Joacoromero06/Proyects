@@ -1,0 +1,11 @@
+%%
+"+"     { printf("SUMA\n");}
+"-"     { printf("RESTA\n");}
+"*"     { printf("PRODUCTO\n");}
+"/"     { printf("DIVISION\n");}
+"|"     { printf("ABS\n");}
+[0-9]+  { printf("Numero: %s\n", yytext); }
+\n      { printf("Nueva Linea\n");}
+[ \t]   {}
+.       { printf("Caracter misterioso %s\n", yytext); }
+%%

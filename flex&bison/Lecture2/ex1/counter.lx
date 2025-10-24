@@ -1,0 +1,50 @@
+%option noyywrap
+%{
+# include <stdio.h>
+int c_vars, c_strings, c_lines;
+int c_total_vars, c_total_strings, c_total_lines;
+%}
+
+
+%%
+\"[a-zA-Z0-9]+\"     {c_strings ++;} 
+[a-zA-Z]+       {c_vars++;}
+\n              {c_lines++;}
+.
+%%
+int main(int argc, char** argv){
+    c_total_lines = 0;
+    c_total_strings = 0;
+    c_total_vars = 0;
+    int i;    
+    if (argc < 2){
+        yylex();
+        printf("cant vars: %d, cant strings: %d, cant line: %d", c_vars, c_strings, c_lines);
+        return 0;
+    }
+    for(i = 1; i< argc; i++){
+        FILE* f;
+        
+        f = fopen(argv[i], "r");
+        if (!f){
+            perror(argv[i]);
+            return 1;
+        }
+        yyrestart(f);
+        yylex();
+        fclose(f);
+        printf("Processed file: %s", argv[i]);
+        printf("\ncant vars: %d \ncant strings: %d \ncant line: %d", c_vars, c_strings, c_lines);
+        
+        
+        c_total_lines += c_lines;
+        c_total_vars += c_vars;
+        c_total_strings += c_strings;
+        c_strings = c_vars = c_lines = 0;
+    }
+    if (argc > 1){
+        printf("MAS DE UN ARCHIVO\n");
+        printf("\ntotal cant vars: %d\ntotal cant strings: %d\ntotal cant line: %d", c_total_vars, c_total_strings, c_total_lines);
+    }
+    return 0;
+}

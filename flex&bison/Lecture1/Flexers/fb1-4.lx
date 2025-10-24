@@ -1,0 +1,44 @@
+%{
+enum  yytokentype{
+    NUMERO = 258,
+    SUMA = 259,
+    RESTA = 260,
+    PROD = 261,
+    DIV = 262,
+    ABS = 263,
+    EOL = 264
+};
+int yylval;
+%}
+
+%%
+
+"+"     { return SUMA;}
+"-"     { return RESTA;}
+"*"     { return PROD;}
+"/"     { return DIV;}
+"|"     { return ABS;}
+[0-9]+  { yylval = atoi(yytext); return NUMERO; }
+\n      { return EOL;}
+[ \t]   {}
+.       { printf("Caracter misterioso %s\n", yytext); }
+
+%%
+
+int main(){
+    int tok;
+
+    while(tok = yylex()){
+        printf("%d", tok);
+        if (tok == NUMERO)
+            printf("= %d", yylval);    
+        printf("\n");
+    }
+
+    return 0;
+}
+/* 
+yylex() es usado por otros prgramas como corutina.
+struct yy_buf{ char* buf; char* yy_ch_buf; } -> fill_buffer
+int yylex()
+*/

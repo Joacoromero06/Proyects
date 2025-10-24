@@ -1,0 +1,61 @@
+/* DEFINICIONES y DECLARACIONES (inicio de programa-c)*/
+%{
+#include "buffer2.h"
+int c_palabras = 0;     //contador de palabras
+int c_caracteres = 0;   //contador de caracteres
+int c_lineas = 0;       //contador de lineas
+int c_numeros = 0;
+YY_BUF_2 buffer = NULL;
+void cartel_inicio();
+%}
+
+/* DEFINICIONES de PATRONES (regex clasicas)*/
+LETRA       [a-zA-Z]
+DIGITO      [0-9]
+PALABRA     {LETRA}+
+NUMERO      {DIGITO}+
+ESPACIO     [ \t]
+SALTO       [ \n]    
+
+/* REGLAS ({patrones} {acciones})*/
+%%
+{PALABRA}       {c_caracteres += yyleng; agrega_string( buffer, yytext ); c_palabras ++;}
+{NUMERO}        {c_numeros ++;}
+.               {}
+%%
+/* 
+    EXPLICACION de variables - metodos del motor lexico FLEX
+        char* yytext:
+            1. puntero a un lexema, que recien matcheo con una parte del input (consola o texto)
+            2. lo usamos para acceder al texto actual que matcheo con una de las (regex)
+            3. (puntero a un buffer interno de flex) - (no es funcion)
+            4. se actualiza cada vez que se matchea un nuevo lexema -> token(regex)
+        int yyleng:
+            1. Un entero que almacena la longitud del lexema "guardado" (apuntado) por -yytext-
+            2. Mas eficiente que calcular strlen(yytext) -- tambien es mas util --
+            3. (es una variable entera, pensemola como global) - (no es funcion)
+*/
+int main( void )
+{
+    cartel_inicio();
+    buffer = crea_buffer_2( 200 );
+    printf("\n Presione ctrl+D o ctrl+C para finalizar.\n ");
+    /*afd que leera el input, esta vez desde consola*/
+    yylex();
+    
+    /* -----ESTADISTICAS-----*/
+    printf("\n Estadisticas del Texto ");
+    printf("\n Cantidad de Palabras: %d", c_palabras);
+    printf("\n Cantidad de Caracteres: %d", c_caracteres);
+    printf("\n  ");
+    return 0;
+}
+void cartel_inicio( void )
+{
+    printf("\n Esta trabajando flex...");
+    printf("\n.");
+    printf("\n.");
+    printf("\n.");
+    printf("\n.");
+    printf("\n Flex creo el lexer con exito!!");
+}

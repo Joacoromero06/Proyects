@@ -1,0 +1,17 @@
+%{
+# include "fb1-5.tab.h"
+%}
+
+%%
+
+"+"     { return SUMA;}
+"-"     { return RESTA;}
+"*"     { return PROD;}
+"/"     { return DIV;}
+"|"     { return ABS;}
+[0-9]+  { yylval = atoi(yytext); return NUMERO; }
+\n      { return EOL;}
+[ \t]   {}
+.       { printf("Caracter misterioso %s\n", yytext); }
+
+%%

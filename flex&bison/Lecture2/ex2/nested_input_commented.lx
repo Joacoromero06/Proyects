@@ -1,0 +1,132 @@
+%option noyywrap //le dice a flex hay un solo archivo, termina cuando encuentres eof 
+%x IFILE//opcion para declarar un estado, solo las regex asociado a ese estado se ejecutan
+
+%{
+/*
+ * Flex scanner to simulate preprocessing include directives.
+ * It handles nested include files using a buffer stack.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct node_bufs_stack {
+    struct node_bufs_stack *prev;  /* previous stack node */
+    YY_BUFFER_STATE bs;            /* flex buffer state */
+    char *filename;                /* file name */
+    FILE *f;                       /* file pointer */
+    int lineno;                    /* current line number */
+} node_bufs_stack;//nombra la estructura al pedo
+
+typedef node_bufs_stack* bufs_stack;
+
+/* Stack management functions */
+int push_file(char *fn);
+int pop_file(void);
+
+/* Global variables */
+bufs_stack curr_bs = NULL;
+char *curr_filename = NULL;
+
+%}
+
+%%
+//regex para #include"libreria"
+^"#"[ \t]*"include"[ \t]*[\"<]    { BEGIN(IFILE);//estado para leer el nombre de la libreria }
+
+//regex solo matchea en el estado IFILE
+<IFILE>[^ \t\n\">]+ {
+    int c;
+    while ((c = input()) && c != '\n');//consume los espacion en blanco
+    yylineno++;
+    if (!push_file(yytext))//si retorna 0 significa que hubo error al pushear
+        yyterminate();
+    BEGIN(INITIAL);//estado defual de flex
+}
+
+<IFILE>.|\n {//machea cualquier cosa literalmente, 
+    fprintf(stderr, "%3d bad include line\n", yylineno);
+    yyterminate();
+    //al estar abajo de la anterior regla si no macheo la anterior es un error
+}
+
+<<EOF>> {
+    if (!pop_file()) yyterminate();//fin archivo pop del archivo si era el ultimo termino
+}
+//fprintf permite introducir string con formato %d %s a un stream como stdout
+^.      { fprintf(stdout, "[%s:%d]> %s", curr_filename, yylineno, yytext); }
+^\n     { fprintf(stdout, "[%s:%d]> %s", curr_filename, yylineno++, yytext); }
+\n      { ECHO; yylineno++; }
+//#define ECHO fwrite( yytext, yyleng, 1, yyout ) es una macro
+.       { ECHO; }
+
+%%
+
+int main(int argc, char **argv) {
+    if (argc < 2) {
+    //main para leer un solo un archivo
+        fprintf(stderr, "Necesito nombre de archivo\n");
+        return 1;
+    }
+    if (push_file(argv[1]))
+    //si no da error empiezo la rutina que sola se encarga de cambiar de leer otro archivo
+        yylex();
+    else
+        fprintf(stderr, "No se encuentra el archivo: %s\n", argv[1]);
+    return 0;
+}
+
+/* Push new file onto stack */
+int push_file(char *fn) {
+    FILE *f = fopen(fn, "r");//abrir archivo
+    if (!f) { perror(fn); return 0; }//si no se abrio erro
+
+    //espacio para pila, que es un puntero a struct buf node
+    bufs_stack pila = malloc(sizeof(node_bufs_stack));
+    if (!pila) { perror("malloc"); exit(1); }
+
+    fprintf(stdout, "=======Entrando al archivo: %s=======\n", fn);
+
+    if (curr_bs)//si hay un archivo leyendeso se guarda su nro de linea 
+        curr_bs->lineno = yylineno;
+
+    pila->prev = curr_bs;//el previo es el anterior
+    pila->f = f;//se llenan los datos de pila el nuevo tope
+    pila->filename = strdup(fn);//duplicar para no perder los valores
+    pila->bs = yy_create_buffer(f, YY_BUF_SIZE);//funcion de flex
+
+    yy_switch_to_buffer(pila->bs);//activa el buffer del tope
+    curr_bs = pila;//el nuevo tope
+    yylineno = 1;//actualizaciopnes
+    curr_filename = pila->filename;
+
+    return 1;
+}
+
+/* Pop file from stack */
+int pop_file(void) {
+    if (!curr_bs) return 0;//si no hay un archivo leyendose error
+    fprintf(stdout, "\n=======Saliendo del archivo: %s=======\n", curr_bs->filename);
+
+    //se usan dos punteros de tipo puntero a struc buf node para pop
+    bufs_stack pila = curr_bs;
+    bufs_stack prev = pila->prev;
+
+    fclose(pila->f);//se cierra el archivo del tope
+    yy_delete_buffer(pila->bs);//free de la struct buf de flex
+    free(pila->filename);//free del char*
+    free(pila);//free del puntero struct buf node
+
+    if (!prev)
+        return 0; /* finished outermost file */
+
+    curr_bs = prev;//el actual es que que estaba abajo en el tope 
+                    //por eso se guarda el puntero luego del free
+                    // del anterior tope no puedo acceder a el
+    //updates
+    yy_switch_to_buffer(prev->bs);
+    yylineno = prev->lineno;
+    curr_filename = prev->filename;
+    return 1;
+}

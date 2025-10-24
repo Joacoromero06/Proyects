@@ -1,0 +1,3 @@
+x = "hola"
+mivar = "chau"
+[asd] ="asd123edad"

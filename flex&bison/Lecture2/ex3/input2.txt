@@ -1,0 +1,4 @@
+Page 2:
+Words are case insensitve, also our algorithm
+get an concordance for each english word, with
+his aparitiation in each file and commenting the line

@@ -1,0 +1,211 @@
+%option yylineno nodefault noyywrap case-insensitive
+//no default saca el automatico ECHO de string sin machear, da error si hay una cadena sin regex
+//case insensitive genera que las regex no distingue de mayus minus
+//noyywrtap le dice a flex que termine al leer solo un archivo que no espere nada de yyin
+%{
+
+#include <stdio.h>
+//representa un simbolo, name es su lexema y reflist lista de referencias del simbolo
+struct symbol {
+    char* name;
+    struct ref* reflist;
+};
+
+//lista enlazada de referencias de un simbolo
+//cada referencia guarda el nombre del archivo en el que aparecio, la linea
+//la bandera esw una simulacion util si se declara un simbolo
+struct ref {
+    struct ref* next;
+    int lineno;
+    char* filename;
+    int flag;
+};
+
+char* currfilename;
+# define NHASH 9997
+struct symbol symtab[NHASH];
+
+void addref(int, char*, char*, int);
+struct symbol* lookup();
+void printrefs();
+
+%}
+
+%%
+//no hacer nada con estas regex, el "regex1 | regex2 | regex3 {algo}"
+//todas las regex hacen la misma accion en este caso nada
+"a" |
+"an" |
+"and" |
+are |
+as |
+at |
+be |
+but |
+for |
+in |
+is |
+it |
+of |
+on |
+or |
+that |
+the |
+this |
+to 
+
+//si no es una palabra clasica, la agrega a las referencias
+[a-z]+(\'(s|t))? {addref(yylineno, currfilename, yytext, 0);}
+.|\n 
+
+%%
+//argv vector de los argumentos pasados al .exe
+int main(int argc, char** argv){
+    int i;
+    if(argc < 2){// si no paso archiivo, leemos de consola
+        currfilename = "(stdin)";
+        yylineno = 1;
+        yylex();
+    }else{
+        for(i = 1; i < argc; i++){
+            FILE* f = fopen(argv[i], "r");
+        //abrimos cada archivo
+
+            if(!f){
+                perror(argv[1]);
+                return 1;
+            }
+        //actualizamo porque estamos leyendo un nuevo
+            currfilename = argv[i];
+        //hace un refresh y empieza de cero, y cambia el FILE* en el que esta
+            yyrestart(f);
+        //actualizaciones iniciales
+            yylineno = 1;
+            yylex();
+            //cerrar al archivo para empezar de nuevo
+            fclose(f);
+        }
+        //mostrar las referencias al finalizar de scanear todo
+        printrefs();
+    }
+}
+
+static unsigned symhash(char* sym){//static para el lex.yy.c
+    unsigned int c, hash = 0;
+    //c para almacenar cada caracter de sym
+    while( (c= *sym) != '\0' ){//mientras no termine sym
+        hash = hash * 9 ^ c;//formula hash, ^ es XOR, eñ *9 cambia casi todos los digitos
+        sym ++;
+    }
+
+    return hash;
+}
+
+struct symbol* lookup(char* sym){//busca sym en la tabla (agrega si no esta)
+    //puntero al registro symbol, donde tiene que ir sym
+    struct symbol* sp = &symtab[symhash(sym)%NHASH];
+    int scount = NHASH - 1;//contador de cuantas cubetas tiene symtab
+
+    while(scount >= 0){//mientras no haya probado todas las cubetas
+        if(sp->name && !strcmp(sym, sp->name))
+        //si hay nombre en el campo name, y es el mismo que sym, ese es symbol a devolver
+            return sp;
+        if(!sp->name){//si no hay nombre agrego, creo en esa cubeta lo necesario para sym
+            sp->name = strdup(sym);//duplicar
+            sp->reflist = NULL;//lookup no agrega referencias
+            return sp;
+        }           
+        //avance del puntero segun el caso
+        if(sp == &symtab[NHASH-1]) 
+            sp = symtab;
+        else
+            sp ++;
+        scount --;
+    }
+    fputs("Error fatal: tabla llena\n", stderr);
+    abort();
+}
+
+void addref(int lineno, char* filename, char* word, int flag){
+    struct ref* r;//puntero aux
+    struct symbol* sp = lookup(word);//obtengo en simpoint, el struct de sym en symtab
+
+    if(sp->reflist &&//si hay una lista de referencia
+        sp->reflist->lineno == lineno &&//si el ultimo tiene el mismo nro de linea
+        !strcmp(sp->reflist->filename, filename) )//y es el mismo archivo
+        return;//no agrego referencia para no sobrecargar
+    
+    r = malloc(sizeof(struct ref));//entonces, agrego la referencia 
+    if(!r){
+        fputs("Error fatal: sin memori\n", stderr);
+        abort();
+    }
+    //agrego por cabeza
+    r->next = sp->reflist;
+    //actualizo todos los datos del nodo ref list
+    r->lineno = lineno;
+    r->flag = 0;
+    r->filename = filename;
+    //la nueva cabeza
+    sp->reflist = r;
+}
+
+static int symcompare(const void* xa, const void* xb){
+    //funcion para comparar que struct sym es mayor segun name
+    const struct symbol* a = (const struct symbol*) xa;
+    const struct symbol* b = (const struct symbol*) xb;
+
+    if(!a->name){
+        if(!b->name){
+            return 0;//si ambos estan vacios, iguales
+        }//el vacio es mayor, entoncs va adelante
+        return 1;
+    }
+    if(!b->name)
+        return -1;//si a esta vacio, a es mayor
+    //si niunguno esta vacio entonces comparo con strcmp
+    return strcmp(a->name,b->name);
+}
+
+void printrefs(){//modulo para mostrar referencias
+    struct symbol* sp;
+    //qsort de stdlib, vector a ordena, tamaño, el size de cada elemento
+    //toda funcion es de tipo puntero, le paso la direccion de la funcion
+    qsort(symtab, NHASH, sizeof(struct symbol), symcompare);
+
+    //desde el inicio hasta que encuentre un elemento sin definir, o me pase del tam
+    for(sp = symtab; sp->name && sp < symtab + NHASH; sp++){
+        char* prevfn = NULL;//puntero para guardar fn de la referencia mostrada anterior
+
+        struct ref* rp = sp->reflist;//ref pointer ACTUAL
+        struct ref* rpp = NULL;//ref pointer PREVIO
+        struct ref* rnp;//ref pointer SIGUIENTE
+        //PREV es la cabeza de la lista enlazada invertida//
+        
+        //da vuelta la lista enlazada de referencia O(n)
+        do {
+            //en SIG guardo la lista enlazada a invertir
+            rnp = rp->next;
+            //invierto al hacer que ACT apunte al PREV
+            rp->next = rpp;
+            //el PREV es el ACT, listo para la siguiente iter
+            rpp = rp;
+            //la lista enlazada a invertir restante esta en SIG.
+            rp = rnp;
+        }while(rp);
+
+        printf("%10s", sp->name);//muestro la list de referencia de sp->name
+        for( rp = rpp; rp; rp = rp->next ){
+            if(rp->filename == prevfn)
+            //si la ref esta en el mismo archivo solo n° linea
+                printf("%d", rp->lineno);
+            else{
+                //si es la referencia es de un nuevo archivo, muestro el fn, solo una vez
+                printf(" %s: %d", rp->filename, rp->lineno);
+                prevfn = rp->filename;
+            }
+        }
+        printf("\n");
+    }
+}
+ 

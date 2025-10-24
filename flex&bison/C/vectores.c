@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <string.h>
+#define TAMVEC 30
+typedef int lista_enteros[TAMVEC];
+
+void ejem1();
+void ejem2();
+void ejem3();
+int ingreso_entero();
+void carga_votos(lista_enteros); 
+int main(){
+    ejem2();
+    return 0;
+}
+
+void ejem1(){
+    char string[TAMVEC];
+    int nro;
+    nro = ingreso_entero();
+    string [nro] = 'a';
+    printf("El caracter %d del string es: %c", nro, string[nro]);
+
+}
+void ejem2(){
+    int asc[TAMVEC] = {0,1,2,3,4,5,6,7};
+    int i;
+    for ( i = 0; i <= TAMVEC - 1; i++ )
+        printf("asc[%d] = %d.\n", i, asc[i]);
+}
+void ejem3(){
+    lista_enteros votos = {0};
+    int voto_actual, cant_candidatos;
+    cant_candidatos = ingreso_entero();
+    if ( cant_candidatos < 0 )
+        do {
+            voto_actual = ingreso_entero();
+            if (voto_actual <= cant_candidatos && voto_actual >= 0)
+                votos [ voto_actual ] ++;
+            else{
+                printf("\ncandidato inexistente");
+                voto_actual = 0;
+            }
+        }while (voto_actual != 0);
+    else
+        printf("\nCantidad de candidatos negativa");
+}
+int ingreso_entero(){
+    int x;
+    printf("\nIngrese un nro entero: ");
+    scanf("%d",&x);
+    return x;
+}

@@ -1,0 +1,180 @@
+%option yylineno nodefault noyywrap case-insensitive
+
+%{
+
+#include <stdio.h>
+struct symbol {
+    char* name;
+    struct ref* reflist;
+};
+
+struct ref {
+    struct ref* next;
+    int lineno;
+    char* filename;
+    int flag;
+};
+
+char* currfilename;
+# define NHASH 9997
+struct symbol symtab[NHASH];
+
+void addref(int, char*, char*, int);
+struct symbol* lookup();
+void printrefs();
+
+%}
+
+%%
+
+"a" |
+"an" |
+"and" |
+are |
+as |
+at |
+be |
+but |
+for |
+in |
+is |
+it |
+of |
+on |
+or |
+that |
+the |
+this |
+to 
+
+[a-z]+(\'(s|t))? {addref(yylineno, currfilename, yytext, 0);}
+.|\n 
+
+%%
+
+int main(int argc, char** argv){
+    int i;
+    if(argc < 2){
+        currfilename = "(stdin)";
+        yylineno = 1;
+        yylex();
+        printrefs();
+    }else{
+        for(i = 1; i < argc; i++){
+            FILE* f = fopen(argv[i], "r");
+        
+
+            if(!f){
+                perror(argv[1]);
+                return 1;
+            }
+            currfilename = argv[i];
+            yyrestart(f);
+            yylineno = 1;
+            yylex();
+            fclose(f);
+        }
+        printrefs();
+    }
+}
+
+static unsigned symhash(char* sym){
+    unsigned int c, hash = 0;
+    
+    while( (c= *sym) != '\0' ){
+        hash = hash * 9 ^ c;
+        sym ++;
+    }
+
+    return hash;
+}
+
+struct symbol* lookup(char* sym){
+    struct symbol* sp = &symtab[symhash(sym)%NHASH];
+    int scount = NHASH - 1;
+
+    while(scount >= 0){
+        if(sp->name && !strcmp(sym, sp->name))
+            return sp;
+        if(!sp->name){
+            sp->name = strdup(sym);
+            sp->reflist = NULL;
+            return sp;
+        }           
+        if(sp == &symtab[NHASH-1]) 
+            sp = symtab;
+        else
+            sp ++;
+        scount --;
+    }
+    fputs("Error fatal: tabla llena\n", stderr);
+    abort();
+}
+
+void addref(int lineno, char* filename, char* word, int flag){
+    struct ref* r;
+    struct symbol* sp = lookup(word);
+
+    if(sp->reflist &&
+        sp->reflist->lineno == lineno &&
+        !strcmp(sp->reflist->filename, filename) )
+        return;
+    
+    r = malloc(sizeof(struct ref));
+    if(!r){
+        fputs("Error fatal: sin memori\n", stderr);
+        abort();
+    }
+    r->next = sp->reflist;
+    r->lineno = lineno;
+    r->flag = 0;
+    r->filename = filename;
+    sp->reflist = r;
+}
+
+static int symcompare(const void* xa, const void* xb){
+    const struct symbol* a = (const struct symbol*) xa;
+    const struct symbol* b = (const struct symbol*) xb;
+
+    if(!a->name){
+        if(!b->name){
+            return 0;
+        }
+        return 1;
+    }
+    if(!b->name)
+        return -1;
+    return strcmp(a->name,b->name);
+}
+
+void printrefs(){
+    struct symbol* sp;
+    qsort(symtab, NHASH, sizeof(struct symbol), symcompare);
+
+    for(sp = symtab; sp->name && sp < symtab + NHASH; sp++){
+        char* prevfn = NULL;
+
+        struct ref* rp = sp->reflist;
+        struct ref* rpp = NULL;
+        struct ref* rnp;
+
+        do {
+            rnp = rp->next;
+            rp->next = rpp;
+            rpp = rp;
+            rp = rnp;
+        }while(rp);
+
+        printf("%10s", sp->name);
+        for( rp = rpp; rp; rp = rp->next ){
+            if(rp->filename == prevfn)
+                printf("%d", rp->lineno);
+            else{
+                printf(" %s: %d", rp->filename, rp->lineno);
+                prevfn = rp->filename;
+            }
+        }
+        printf("\n");
+    }
+}
+ 

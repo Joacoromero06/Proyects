@@ -1,0 +1,5 @@
+#include "input2.txt"
+let A = {q0,q1,q2};
+forall q in A:
+
+enfor
