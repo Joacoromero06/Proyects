@@ -1,0 +1,45 @@
+fn afnd2afd(A): list;
+MAIN: 
+    # Ingreso de automata no determinista
+    A = ingreso();
+    # Obtener automata determista apartir de A
+    B = afnd2afd(A);
+
+ENDMAIN
+
+fn afnd2afd(A):
+
+    # Inicialización de los autómatas
+    let A => (QA, SigmaA, DA, Q0A, FA);
+    B = [{}, SigmaA, {}, {Q0A}, {}];
+    let B => (QB, SigmaB, DB, Q0B, FB);
+    QB = QB union {Q0B};
+
+    # Algoritmo
+    while (nuevos != {}) do
+        temp = {};
+        forall (R in nuevos) do
+            forall (a in SigmaB) do
+                Response = {};
+                forall (q in R) do
+                    forall (T in DA) do
+                        if (T[1] == q and T[2] == a)
+                                Response = Response union {T[3]};
+                        endif
+                    end
+                end
+                if (not (Response belongs QB))
+                    QB = QB union {Response};
+                    temp = temp union {Response};
+                endif
+                DB = DB union {[R, a, Response]};
+
+            end
+        end
+        nuevos = temp;
+    end
+    forany (S in QB | S inter FA != {}) do
+	    FB = FB union {S};
+    end
+
+endfn

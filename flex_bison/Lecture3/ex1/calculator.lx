@@ -1,0 +1,20 @@
+%{
+#include "calculator.tab.h"    
+%}
+%option noyywrap
+%%
+
+"+" {return SUMA;}
+"-" {return RESTA;}
+"*" {return PRODUCTO;}
+"/" {return DIVISION;}
+[0-9]+ {yylval = atoi(yytext);return NUMERO;}
+"(" {return L_PAR;}
+")" {return R_PAR;}
+"|" {return ABS;}
+\n {return EOL;}
+[ \t] {}
+. {printf("caracter misterioros: %s\n", yytext);}
+
+
+%%

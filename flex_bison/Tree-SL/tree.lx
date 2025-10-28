@@ -1,0 +1,83 @@
+%option noyywrap nodefault yylineno
+%{
+#include "tree.tab.h"
+%}
+
+%%
+
+
+"+" |
+"-" |
+"*" |
+"/" |
+"=" |
+"|" |
+"(" |
+")" |
+"{" |
+"}" |
+"[" |
+"]" | 
+"," |
+":" |
+";"        { printf("RESERVED CHAR: %c\n", yytext[0]); return yytext[0]; }
+
+"<" |
+">" |
+">=" |
+"<=" |
+"==" |
+"!=" |
+"belongs"  { printf ("CMP: %s\n", yytext); return CMP; }
+
+"**"       { printf("**\n");return EXPONENCIACION; }
+
+"or"       { printf("OR\n"); return OR; }
+"and"      { printf("AND\n"); return AND; }
+"not"      { printf("NOT\n"); return NOT; }
+"true"     { printf("BOOL_LIT\n"); return BOOL_LIT; } 
+"false"    { printf("BOOL_LIT\n"); return BOOL_LIT; } 
+
+"int"      { printf("INT\n"); return INT; }
+"set"      { printf("SET\n"); return SET; }
+"list"     { printf("LIST\n"); return LIST; }
+"string"   { printf("STRING\n"); return STRING; }
+"boolean"  { printf("BOOLEAN\n"); return BOOLEAN; }
+
+"let"      { printf("LET\n"); return LET; }
+"=>"       { printf("FLECHA\n"); return FLECHA; }
+
+"do"       { printf("DO\n"); return DO; }
+"end"      { printf("END\n"); return END; }
+"in"       { printf("IN\n"); return IN; }
+
+"if"       { printf("IF\n"); return IF; }
+"then"     { printf("THEN\n"); return THEN; }
+"endif"    { printf("ENDIF\n"); return ENDIF; }
+"else"     { printf("ELSE\n"); return ELSE; }
+"while"    { printf("WHILE\n"); return WHILE; }
+"forall"   { printf("FORALL\n"); return FORALL; }
+"forany"   { printf("FORANY\n"); return FORANY; }
+
+"union"    { printf("UNION\n"); return UNION; }
+"inter"    { printf("INTER\n"); return INTER; }
+"diff"     { printf("DIFF\n"); return DIFF; }
+"take"     { printf("TAKE\n"); return TAKE; }
+"concat"   { printf("CONCAT\n"); return CONCAT; }
+"add"      { printf("ADD\n"); return ADD; }
+"kick"     { printf("KICK\n"); return KICK; }
+
+"return"   { printf("RETURN\n"); return RETURN; } 
+"endfn"    { printf("ENDFN\n"); return ENDFN; } 
+"fn"       { printf("FN\n"); return FN; } 
+"MAIN"     { printf("MAIN\n"); return MAIN; }
+"ENDMAIN"  { printf("ENDMAIN\n"); return ENDMAIN;}
+
+"#".*\n    {}
+[ \t]      {}
+\n         { printf("NEWLINE\n"); }
+[a-zA-Z][a-zA-Z0-9_]*   { printf("ID: %s\n", yytext); return ID; }
+[0-9]+     { printf("NUMBER: %s\n",yytext);return NUMBER; }
+.          { printf("caracter misterioso: %c\n", *yytext); }
+
+%%

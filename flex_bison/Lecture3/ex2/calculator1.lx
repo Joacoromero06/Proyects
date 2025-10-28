@@ -1,0 +1,27 @@
+%option noyywrap nodefault yylineno
+%{
+#include "ast1.h"
+#include "calculator1.tab.h"
+%}
+
+EXP ([Ee][+-]?[0-9]+)
+
+%%
+
+"+" |
+"-" |
+"*" |
+"/" |
+"|" |
+"(" |
+")" {return yytext[0];}
+
+[0-9]+"."[0-9]*{EXP}? |
+"."?[0-9]+{EXP}? {yylval.d = atof(yytext);return NUMBER;}
+
+\n {return EOL;}
+"//".*
+[ \t]
+. {yyerror("caracter misterioso: %c", *yytext);}
+
+%%
