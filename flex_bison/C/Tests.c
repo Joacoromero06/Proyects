@@ -1,4 +1,15 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/cpplite/CTemplate.c to edit this template
- */
+#include <stdio.h>
+int main(){
+    //ok
+    int b = 2, d = 4, c, a;
+    a = b + (c = d / b) - 1;
+    printf("Test: %d\n", a);
+    
+    //ok
+    --a;    
+    printf("Test: %d\n", a);
+    
+    
+    return 0;
+
+}
