@@ -11,3 +11,4 @@ viz.save()
 result = solver.find_root(0)
 viz.add_root_from_result(result)
 viz.save()
+

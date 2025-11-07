@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List
 from fractions import Fraction
@@ -22,7 +23,7 @@ class Coefficient(ABC):
         pass
 
     @abstractmethod
-    def to_integer(self)->'IntegerCoefficient':
+    def to_integer(self)->IntegerCoefficient:
         """ 
         Retorna el coeficiente actual en formato IntegerCoefficient
         Conversion to Integer
@@ -30,7 +31,7 @@ class Coefficient(ABC):
         pass
 
     @abstractmethod 
-    def to_rational(self)->'RationalCoefficient':
+    def to_rational(self)->RationalCoefficient:
         """
         REtorna el coeficiente actual en formato RAtionalCoefficient
         Conversion a Rational
@@ -38,13 +39,13 @@ class Coefficient(ABC):
         pass
 
     @abstractmethod
-    def to_real(self)->'RealCoefficient':
+    def to_real(self)->RealCoefficient:
         """
         Retorna el coeficiente actual en formato REalCoefficient
         Conversion a Float
         """
 
-    def promote_to(self, target_type: str)->'Coefficient':
+    def promote_to(self, target_type: str)->Coefficient:
         """ Convierte self, al target_type """
         if target_type == 'Integer':
             return self.to_integer()
@@ -55,7 +56,7 @@ class Coefficient(ABC):
         raise ValueError(f'Intento de promote_to() con tipo desconocido: {target_type}')
     
     @staticmethod
-    def _get_dominant_type(coef1: 'Coefficient', coef2: 'Coefficient')->str:
+    def _get_dominant_type(coef1: Coefficient, coef2: Coefficient)->str:
         """
         Descripcion:
             Metodo utilitaria de la clase
@@ -73,7 +74,7 @@ class Coefficient(ABC):
         max_type = type1 if map_h[type1] > map_h[type2] else type2
         return max_type
     
-    def __add__(self, other: 'Coefficient')-> 'Coefficient':
+    def __add__(self, other: Coefficient)-> Coefficient:
         """Iguala los tipos y computa la suma"""
         dominant_type = Coefficient._get_dominant_type(self, other)
         a = self.promote_to(dominant_type)
@@ -85,7 +86,8 @@ class Coefficient(ABC):
             return RationalCoefficient.from_fraction(a.value + b.value)
         if dominant_type == 'Real':
             return RealCoefficient(a.value + b.value)  
-    def __sub__(self, other: 'Coefficient')-> 'Coefficient':
+        return IntegerCoefficient(0)
+    def __sub__(self, other: Coefficient)-> Coefficient:
         """Iguala los tipos y computa la suma"""
         dominant_type = Coefficient._get_dominant_type(self, other)
         a = self.promote_to(dominant_type)
@@ -96,8 +98,9 @@ class Coefficient(ABC):
         if dominant_type == 'Rational':
             return RationalCoefficient.from_fraction(a.value - b.value)
         if dominant_type == 'Real':
-            return RealCoefficient(a.value - b.value)     
-    def __mul__(self, other: 'Coefficient')-> 'Coefficient':
+            return RealCoefficient(a.value - b.value)    
+        return IntegerCoefficient(0)
+    def __mul__(self, other: Coefficient)-> Coefficient:
         """Iguala los tipos y computa la suma"""
         dominant_type = Coefficient._get_dominant_type(self, other)
         a = self.promote_to(dominant_type)
@@ -108,8 +111,9 @@ class Coefficient(ABC):
         if dominant_type == 'Rational':
             return RationalCoefficient.from_fraction(a.value * b.value)
         if dominant_type == 'Real':
-            return RealCoefficient(a.value * b.value)     
-    def __truediv__(self, other: 'Coefficient')-> 'Coefficient':
+            return RealCoefficient(a.value * b.value)
+        return IntegerCoefficient(0)
+    def __truediv__(self, other: Coefficient)-> Coefficient:
         """Iguala los tipos y computa la suma"""
         dominant_type = Coefficient._get_dominant_type(self, other)
         a = self.promote_to(dominant_type)
@@ -121,12 +125,13 @@ class Coefficient(ABC):
             return RationalCoefficient.from_fraction(a.value / b.value)
         if dominant_type == 'Real':
             return RealCoefficient(a.value / b.value)
+        return IntegerCoefficient(0)
         
     
     def __repr__(self):
         return f'{self.__class__.__name__}( {self.value} )'
-    def __eq__(self, other: 'Coefficient'):
-        if not isinstance(other, 'Coefficient'):
+    def __eq__(self, other: Coefficient):
+        if not isinstance(other, Coefficient):
             return False
         return self.value == other.value and type(self) == type(other)
     def __str__(self):
@@ -213,38 +218,7 @@ class RealCoefficient(Coefficient):
     def to_real(self):
         return self
 
-class Coeffients:
-    def __init__(self, coeffs: List[Coefficient]):
-        self._coeffs = coeffs.copy()
-        self._unified = False
 
-    def unify_type(self)->None:
-        """ Modifica in-place el tipo de los coeffs al mas complejo """
-        if self._unified or not self._coeffs:
-            return
-        
-        dominant_type = self.get_dominant_type()
-        self._coeffs = [ c.promote_to(dominant_type) for c in self._coeffs ]
-        self.unify_type = True
-
-    def get_dominant_type(self)->str:
-        """ Determina el tipo mas complejo de los coeff en la _coeffs"""
-        map_h = {# hash(tipo) -> hierarchy
-            'Integer': 1,
-            'Rational': 2,
-            'Real': 3
-        }
-
-        dominant_type = ''
-        dominant_level = 0
-        for c in self._coeffs:
-            tipo = c.get_type()
-            level = map_h[ tipo ] 
-            if level > dominant_level:
-                dominant_level = level
-                dominant_type = tipo
-        
-        return tipo
 
 if __name__ == '__main__':
     a = RealCoefficient(3.14)

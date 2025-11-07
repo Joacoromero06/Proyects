@@ -4,6 +4,10 @@
     "python-envs.pythonProjects": [],
     "files.associations": {
         ".als.json": "jsonc",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "math.h": "c",
+        "ast.h": "c",
+        "data.h": "c",
+        "data2.h": "c"
     }
 }
