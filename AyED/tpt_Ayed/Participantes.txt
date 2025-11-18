@@ -1,0 +1,11 @@
+Participantes:
+Fabrizio Agustin Guaymas
+Dni:43551069
+Alias:PanaShordan o Piyei
+
+Joaquin Ignacio Romero
+Dni:46790909
+Alias:NiñoMiclovin o yota
+Comando para ejecutar test: 
+PS C:\Users\Usuario\OneDrive\Escritorio\Ayed-TP-grupal> javac -d bin Test/testEmpresa.java
+PS C:\Users\Usuario\OneDrive\Escritorio\Ayed-TP-grupal> java -cp bin Test.testEmpresa
