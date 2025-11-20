@@ -14,6 +14,7 @@ int yylex();
 %token FN ENDFN MAIN ENDMAIN RETURN
 %token INT SET LIST STRING BOOLEAN
 
+%left CMP
 %left UNION 
 %left INTER
 %left DIFF
@@ -22,7 +23,6 @@ int yylex();
 %left OR
 %left AND
 %right NOT
-%left CMP
 %left '+' '-'
 %left '*' '/'
 %right EXPONENCIACION
@@ -54,8 +54,8 @@ list_stm:   stm
         | list_stm stm 
 ;
 
-stm:    assign_s ';'
-        | assign_m ';'
+stm:    assign_s ';'   stm.type = assign_s.type; stm.val = assign_s.val
+        | assign_m ';' // lo mismo
         | while_stm
         | if_stm
         | forall_stm
@@ -64,27 +64,40 @@ stm:    assign_s ';'
 ;
 
 assign_s: ID '=' exp
-;
+; 
 
 assign_m: LET ID FLECHA '(' list_id ')'
 ;
+assign_m.type = "SL_asT"
+assign_m.val = newast('SL', $2, $5)
 
 while_stm: WHILE '(' exp ')' DO block END
 ;
+while_stm.type = "ast_w"
+while_stm.val = newflow(NULL,$3, $6, NULL) 
+ID: atributo del astflow, proposito nombre de la variable que itera.
+cond, true block, false block
+
 
 if_stm: IF '(' exp ')' block ENDIF
         | IF '(' exp ')' block ELSE block ENDIF
 ;
+while_stm.type = "ast_if"
+while_stm.val = newflow(NULL,$3, $5, $7) 
 
 forall_stm: FORALL '(' ID IN exp ')' DO block END
 ;
+while_stm.type = "ast_forall"
+while_stm.val = newflow($3,$5, $8, NULL) 
 
 forany_stm: FORANY '(' ID IN exp '|' exp ')' DO block END
 ;
+while_stm.type = "ast_forany"
+while_stm.val = newflow($3,$5, $7, $10) 
 
 exp: ID
-        | exp OR exp
         | exp AND exp
+        | exp OR exp
         | NOT exp
         | exp CMP exp
         | exp UNION exp
@@ -107,6 +120,7 @@ exp: ID
         | fn_call
         | '(' exp ')'
 ;
+
 
 return_stm: RETURN exp ';'
 ;

@@ -8,10 +8,11 @@ int yylex();
 %}
 %union{
     tData data;
+    struct ast* a;
 }
 %token <data> STRING_LIT
 
-%type <data> exp
+%type <s> exp
 
 
 
