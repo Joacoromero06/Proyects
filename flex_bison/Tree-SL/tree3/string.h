@@ -1,8 +1,6 @@
-#ifndef TAD_STRING_H
-#define TAD_STRING_H
+#ifndef STRING_H
+#define STRING_H
 
-#include <stdio.h>
-#include <stdlib.h>
 
 typedef struct nodo_str{
 	char dato;

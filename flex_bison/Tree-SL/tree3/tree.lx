@@ -1,0 +1,33 @@
+%option noyywrap nodefault yylineno
+%{
+# include "defs.h"
+# include "data.h"
+# include "tree.tab.h"
+%}
+
+%%
+
+"+" |
+"-" |
+"*" |
+"/" |
+"{" |
+"}" |
+"[" |
+"]" | 
+"," { printf("RESERVED CHAR: %c\n", yytext[0]); return yytext[0]; } 
+
+KICK { printf("RESERVED WORD: %s\n", yytext); return KICK; }
+ADD  { printf("RESERVED WORD: %s\n", yytext); return ADD; }
+FROM { printf("RESERVED WORD: %s\n", yytext); return FROM; }
+
+UNION
+
+
+"#".*\n    {}
+[ \t]      {}
+\n         { printf("NEWLINE\n"); } 
+[0-9]+     { printf("NUMBER: %s\n",yytext); yylval.d = createInt(atoi(yytext)); return NUMBER; }
+.          { printf("caracter misterioso: %c\n", *yytext); }
+
+%%

@@ -1,15 +1,7 @@
-#ifndef TAD_DATA_H
-#define TAD_DATA_H
+#ifndef DATA_H
+#define DATA_H
 
-#include "TAD_string.h"
-#define STR 1
-#define LIST 2
-#define SET 3
-#define INT 4
-#define DOUBLE 5
-#define BOOL 6
-
-
+# include "string.h"
 
 typedef struct nodo_data{
 	int tipoNodo;
@@ -31,8 +23,8 @@ tData createData(int);
 tData createList();
 tData createSet();
 tData createStr();
-tData createInt();
-tData createDouble();
+tData createInt(int);
+tData createDouble(double);
 tData createBool();
 
 
@@ -62,5 +54,10 @@ tData crearDesdeCadena(const char*);
 //funciones auxiliares de AF
 char dataAcadena(tData);
 tData obtener_elemento(tData, int);
+
+
+
+tData get_dato (tData);
+tData get_next (tData);
 
 #endif

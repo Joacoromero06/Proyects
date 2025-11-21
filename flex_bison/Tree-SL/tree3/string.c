@@ -1,4 +1,5 @@
-#include "TAD_string.h"
+# include "string.h"
+# include "defs.h"
 
 /*MUDULOS PUBLICOS QUE YO AGREGUE*/
 

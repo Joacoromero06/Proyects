@@ -1,4 +1,7 @@
-#include "TAD_data.h"
+# include "data.h"
+# include "defs.h"
+
+/*update change in line(475) restante->cad to restante->cad->dato*/
 
 tData createData(int tipo){
 	tData nvo;
@@ -34,6 +37,7 @@ tData createData(int tipo){
 	
 	return nvo;
 }
+
 tData createList(){
 	return createData(LIST);
 }
@@ -43,14 +47,28 @@ tData createSet(){
 tData createStr(){
 	return createData(STR);
 }
-tDate createInt(){
-	return createData(INT);
+tData createInt(int value){
+	tData nvo = createData(INT);
+	nvo->value = value;
+	return nvo;
 }
-tData createDouble(){
-	return createData(DOUBLE);
+tData createDouble(double real){
+	tData nvo = createData(DOUBLE);
+	nvo->real = real;
+	return nvo;
 }	
 tData createBool(){
 	return createData(BOOL);
+}
+
+tData sumaData(tData a, tData b){
+	if(a->tipoNodo == DOUBLE  && b->tipoNodo == DOUBLE)
+		return createDouble(a->real + b->real);
+	if(a->tipoNodo == DOUBLE  && b->tipoNodo == INT)
+		return createDouble(a->real + b->value);
+	if(a->tipoNodo == INT  && b->tipoNodo == DOUBLE)
+		return createDouble(a->real + b->value);
+	return createInt(a->value + b->value);
 }
 
 void mostrarData(tData nodo){
@@ -101,57 +119,57 @@ void mostrarData(tData nodo){
 	}
 }
 
-void agregarData(tData* cab, tData elem){
-	
-	if((*cab) == NULL || (*cab)->dato == NULL){
-		tData nvo;
-		//elem->tipoNodo != LIST elem->tipoNodo != SET
-		if(elem->tipoNodo == STR){
-			if((*cab) != NULL)
-				nvo = createData((*cab)->tipoNodo);
-			else
-				nvo = createList();
-			nvo->dato = copiarData(elem);
-			*cab = nvo;
-		}
-		else{
-			tData nvo = createData((*cab != NULL) ? (*cab)->tipoNodo : LIST);  // o SET seg�n contexto
-			nvo->dato = copiarData(elem);
-			*cab = nvo;
-		}
+void agregarData(tData* cabe, tData elem){
+	printf("Estoy en agregarData \n");
+	tData cab = *cabe;
+	if (!cab) { printf("No se puede agregar un elemento a un espacio de memoria no asignado"); return; }
+	if(cab->dato == NULL){
+		printf("la lista esta vacia \n");
+		cab->dato = copiarData(elem);
+		/*nvo = createData(cab->tipoNodo);
+		nvo->dato = copiarData(elem); 
+		cab = nvo;*/
 	}
 	else{
-		switch ((*cab)->tipoNodo){
+		switch (cab->tipoNodo){
 		case STR: 
 			return;
 			break;
 		case SET:
 		case LIST: {
-			tData aux = *cab;
 			tData nvo;
 			
-			if (aux->tipoNodo == SET) {
-				if(pertenece(aux, elem) == 0) 
+			if (cab->tipoNodo == SET) {
+				if(pertenece(cab, elem) == 0) 
 					return;
 			}
-			while (aux->sig != NULL)
-				aux = aux->sig;
+			printf("Estoy en agregarData\n");
+
+			while (cab->sig != NULL)
+				cab = cab->sig;
 			
-			nvo = createData(aux->tipoNodo);
+			nvo = createData(cab->tipoNodo);
 			nvo->dato = copiarData(elem);
-			aux->sig = nvo;
+			cab->sig = nvo;
 			break;
 			}
 		}
 	}
+	printf("\n\ndespues de agregar elem: ");mostrarData(elem); 
+	printf("\nla lista cab quedo: ");mostrarData(cab); printf("\n");
 }	
 	
-//funciones nucleo	
+//falta para bool
 tData copiarData (tData copiado){
 	tData nvo = NULL;
 	if (copiado == NULL) return nvo;
 	
 	switch (copiado->tipoNodo){
+	case INT:
+		nvo = createInt(copiado->value); 
+		break;
+	case DOUBLE:
+		nvo = createDouble(copiado->real);
 	case STR:
 		nvo = createStr(); 
 		nvo->cad = copyStr(copiado->cad);
@@ -468,7 +486,7 @@ tData toSetWToken(tData cad, char token){
 	
 	restante = copiarData(cad);
 	
-	while (restante->cad != NULL && restante->cad != '\0') {
+	while (restante->cad != NULL && restante->cad->dato != '\0') {
 		tData parte= createStr();
 		parte->cad = before_token(restante->cad, token);  
 		tData siguiente= createStr();
@@ -556,6 +574,7 @@ tData crearDesdeCadena(const char *input) {
 }
 
 
+
 char dataAcadena(tData a){
 	if(a->tipoNodo != STR)
 		return '\0';
@@ -605,3 +624,44 @@ tData obtener_elemento(tData lista, int pos) {
 	}
 	return (lista != NULL) ? lista->dato : NULL;
 }	
+void eliminar_pos(tData* l, int pos){
+	int i;
+	tData ant, nav;
+	nav = *l;
+	ant = NULL;
+	for(i = 1; i < pos && l; i++){
+		ant = l;
+		l = get_next(l);
+	}
+	if(!l) return; 			// posicion fuera de la lista
+	if(!ant) {				// eliminar cabeza
+		*l = get_next(nav); 
+		freeData(nav);
+	}
+	else{					// eliminacion en lista
+		set_next(&ant , get_next(l));
+	}
+
+
+		
+
+
+}
+
+
+tData get_dato (tData a){
+	return a->dato;
+}
+
+tData get_next (tData a){
+	return a->sig;
+}
+
+void set_next(tData* node, tData next){
+	(*node)->sig = next;
+}
+
+void set_dato(tData* node, tData dato){
+	(*node)->dato = dato;	
+}
+
