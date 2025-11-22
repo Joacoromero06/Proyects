@@ -1,1 +1,0 @@
-╰λ gcc -o tree string.c data.c ast.c lex.yy.c tree.tab.c
