@@ -1,0 +1,50 @@
+%option noyywrap
+%{
+    #include "data.h"
+    #include "tree.tab.h"  
+%}
+EXP ([eE][+-]?[0-9]+)
+
+%%
+"," |
+"[" |
+"]" |
+"{" |
+"}" |
+"+" | 
+"-" | 
+"*" |
+"/" { printf("RESERVED SYMBOL\n"); return yytext[0]; }
+
+kick { printf("RESERVED WORD\n"); return T_KICK; }
+add { printf("RESERVED WORD\n"); return T_ADD; }
+take { printf("RESERVED WORD\n"); return T_TAKE; }
+from { printf("RESERVED WORD\n"); return T_FROM; }
+to { printf("RESERVED WORD\n"); return T_TO; }
+concat { printf("RESERVED WORD\n"); return T_CONCAT; }
+
+in { printf("RESERVED WORD\n"); return T_IN; }
+
+union { printf("RESERVED WORD\n"); return T_UNION; }
+inter { printf("RESERVED WORD\n"); return T_INTER; }
+diff { printf("RESERVED WORD\n"); return T_DIFF; }
+contains { printf("RESERVED WORD\n"); return T_CONTAINS; }
+
+"true" |
+"false" { yylval.td = createBool(yytext); return T_BOOL; }
+
+[0-9]+               { printf("NUMBER: %s\n",yytext); 
+                        yylval.td = createInt(atoi(yytext)); return NUM_INT; }
+\"[a-z][a-z0-9]*\"   { printf("ATOMO: %s\n",yytext); 
+                        yylval.td = createStr(yytext); return ATOM; }
+[a-zA-Z][a-zA-Z0-9]* { printf("ID: %s\n",yytext); return ID; }
+[0-9]+"."?[0-9]*{EXP}? |
+[0-9]*"."?[0-9]+{EXP}?  { yylval.td = createDouble(atof(yytext)); return NUM_DOUBLE; }
+
+
+
+[ \t] {} /*espacios vacios del codigo*/
+\n  { return EOL; }
+.   { printf("CARACTER DESCONOCIDO: %s\n",yytext); }
+
+%%

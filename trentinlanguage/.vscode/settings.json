@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        ".als.json": "jsonc",
+        "defs.h": "c"
+    }
+}
