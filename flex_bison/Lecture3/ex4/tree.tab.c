@@ -1244,7 +1244,7 @@ yyreduce:
 
   case 25: /* tree: tree LET ID '(' sym_list ')' '=' block EOL  */
 #line 66 "tree.y"
-                                             {dodef((yyvsp[-6].s), (yyvsp[-4].sl), (yyvsp[-1].a));printf("defined: %s", (yyvsp[-6].s)->name);}
+                                             {dodef((yyvsp[-6].s), (yyvsp[-4].sl), (yyvsp[-1].a));printf("defined: %s\n", (yyvsp[-6].s)->name);}
 #line 1249 "tree.tab.c"
     break;
 

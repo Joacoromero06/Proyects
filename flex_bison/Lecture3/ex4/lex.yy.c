@@ -836,7 +836,7 @@ YY_RULE_SETUP
 case 11:
 YY_RULE_SETUP
 #line 22 "tree.lx"
-{yylval.fn = 1; return CMP;}
+{yylval.fn = 1; return CMP;} 
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
@@ -866,7 +866,7 @@ YY_RULE_SETUP
 case 17:
 YY_RULE_SETUP
 #line 29 "tree.lx"
-{yylval.fn = F_sqrt; return FUNC;}
+{yylval.fn = F_sqrt; return FUNC;} 
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
@@ -928,33 +928,33 @@ YY_RULE_SETUP
 case 30:
 YY_RULE_SETUP
 #line 45 "tree.lx"
-{}
+{} 
 	YY_BREAK
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 46 "tree.lx"
+#line 47 "tree.lx"
 {printf("$$> ");}
 	YY_BREAK
 case 32:
 /* rule 32 can match eol */
 YY_RULE_SETUP
-#line 47 "tree.lx"
+#line 48 "tree.lx"
 {return EOL;} 
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 48 "tree.lx"
+#line 49 "tree.lx"
 
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 49 "tree.lx"
+#line 50 "tree.lx"
 {printf("Caracter misterioso: '%c'", yytext[0]);}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 50 "tree.lx"
+#line 51 "tree.lx"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
 #line 960 "lex.yy.c"
@@ -1974,7 +1974,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 50 "tree.lx"
+#line 51 "tree.lx"
 
 
 
