@@ -34,6 +34,7 @@ class SelfAttention(nn.Module):
         Z = W @ V
         return Z
 # %%
+torch.manual_seed(123)
 d_in, d_out = 3, 2
 f = SelfAttention(d_in, d_out)
 X = torch.tensor(
